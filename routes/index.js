@@ -113,11 +113,11 @@ router.post('/meta_wa_callbackurl',async (req, res) => {
                                 },
                             ],
                             name: {
-                                first_name: 'Daggie',
-                                last_name: 'Blanqx',
+                                first_name: 'Collins',
+                                last_name: 'Hillary',
                             },
                             org: {
-                                company: 'Mom-N-Pop Shop',
+                                company: 'Shop',
                             },
                             phones: [
                                 {
@@ -198,28 +198,31 @@ router.post('/meta_wa_callbackurl',async (req, res) => {
 
                 if (button_id === 'checkout') {
                     let finalBill = listOfItemsInCart({ recipientPhone });
-                    let invoiceText = `List of items in your cart:\n`;
-                  
-                    finalBill.products.forEach((item, index) => {
-                        let serial = index + 1;
-                        invoiceText += `\n#${serial}: ${item.title} @ $${item.price}`;
+                    let invoice_data = {}
+                    invoice_data.date = new Date().toISOString();
+                    invoice_data.time = new Date().toLocaleTimeString();
+                    invoice_data.customer = {
+                        name: recipientName,
+                        phone: recipientPhone,
+                    };
+                    invoice_data.items = finalBill.products.map((product) => {
+                        return {
+                            name: product.title,
+                            price: product.price,
+                            quantity: 1,
+                        }; 
                     });
-                  
-                    invoiceText += `\n\nTotal: $${finalBill.total}`;
+                    invoice_data.invoice_nr = Math.floor(Math.random() * 1000000);
                   
                     Store.generatePDFInvoice({
-                        order_details: invoiceText,
+                        order_details: invoice_data,
                         file_path: `./invoices/invoice_${recipientName}.pdf`,
                     });
                   
-                    await Whatsapp.sendText({
-                        message: invoiceText,
-                        recipientPhone: recipientPhone,
-                    });
                   
                     await Whatsapp.sendSimpleButtons({
                         recipientPhone: recipientPhone,
-                        message: `Thank you for shopping with us, ${recipientName}.\n\nYour order has been received & will be processed shortly.`,
+                        message: `Thank you for shopping with us, ${recipientName}.\n\nYour order has been placed and invoice has been generated.`,
                         message_id,
                         listOfButtons: [
                             {
@@ -240,8 +243,8 @@ router.post('/meta_wa_callbackurl',async (req, res) => {
                     // Send the PDF invoice
                     await Whatsapp.sendDocument({
                         recipientPhone: recipientPhone,
-                        caption:`Mom-N-Pop Shop invoice #${recipientName}`,
-                        file_path: `./invoice_${recipientName}.pdf`,
+                        caption:`Shop invoice #${recipientName}`,
+                        file_path: `./invoices/invoice_${recipientName}.pdf`,
                     });
                   
                     // Send the location of our pickup station to the customer, so they can come and pick up their order
@@ -257,7 +260,7 @@ router.post('/meta_wa_callbackurl',async (req, res) => {
                         latitude: warehouse.latitude,
                         longitude: warehouse.longitude,
                         address: warehouse.address,
-                        name: 'Mom-N-Pop Shop',
+                        name: 'Shop',
                     });
                   }
             }
