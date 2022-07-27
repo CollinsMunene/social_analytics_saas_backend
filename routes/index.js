@@ -1,8 +1,8 @@
 'use strict';
 
 const router = require('express').Router();
-const EcommerceStore = require('../utils/ecommerce_store');
-const Store = new EcommerceStore();
+const Store = require('../utils/store');
+const Store = new Store();
 const CustomerSession = new Map();
 
 const WhatsappCloudAPI = require('whatsappcloudapi_wrapper');
@@ -13,10 +13,8 @@ const Whatsapp = new WhatsappCloudAPI({
     WABA_ID: process.env.Meta_WA_wabaId,
 })
 
-router.get('/meta_wa_callbackurl', (req, res) => {
+router.get('/callback', (req, res) => {
     try{
-        console.log("Get: someone is pinging me!");
-
         let mode = req.query['hub.mode'];
         let token = req.query['hub.verify_token'];
         let challenge = req.query['hub.challenge'];
@@ -34,10 +32,8 @@ router.get('/meta_wa_callbackurl', (req, res) => {
     }    
 })
 
-router.post('/meta_wa_callbackurl',async (req, res) => {
+router.post('/callback',async (req, res) => {
     try{
-        console.log("Post: someone is pinging me!");
-  
         let data = Whatsapp.parseMessage(req.body);
 
         if(data?.isMessage){

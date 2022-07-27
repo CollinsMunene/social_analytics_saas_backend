@@ -4,7 +4,7 @@ const request = require('request');
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
 
-module.exports = class EcommerceStore{
+module.exports = class Store{
     constructor(){
     }
 
@@ -222,4 +222,4 @@ function formatDate(date) {
     const year = date.getFullYear();
   
     return year + "/" + month + "/" + day;
-  }
+}
